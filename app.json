@@ -8,8 +8,7 @@
   ],
   "addons": [
     "heroku-postgresql:hobby-dev",
-    "herokuconnect:demo",
-    "papertrail:choklad"
+    "herokuconnect:demo"
   ],
   "env": {
     "JAVA_OPTS": "-Xss512k -XX:+UseCompressedOops",
