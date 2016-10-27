@@ -1,78 +1,78 @@
 var con = {
 
     login: function($scope, $rootScope, $http, $location, User, authHttp){
-		$scope.hasAccess = User.hasAccess;
-	        //$scope.build = BUILD_NUMBER;
-        	$scope.version = VERSION_NUMBER;
+        $scope.hasAccess = User.hasAccess;
+            //$scope.build = BUILD_NUMBER;
+            $scope.version = VERSION_NUMBER;
         $scope.accessCode = '';
         $scope.email = '';
-		$scope.appPath = '/Surveys';
-		$scope.pathName = 'Surveys ';
+        $scope.appPath = '/Surveys';
+        $scope.pathName = 'Surveys ';
 
-		if(localStorage.getItem(CACHED_SURVEY_DATA) != 'null' && localStorage.getItem(CACHED_SURVEY_DATA) != null){
-			$scope.appPath = '/review';
-			$scope.pathName = 'Review Unsaved Survey';
-		}
+        if(localStorage.getItem(CACHED_SURVEY_DATA) != 'null' && localStorage.getItem(CACHED_SURVEY_DATA) != null){
+            $scope.appPath = '/review';
+            $scope.pathName = 'Review Unsaved Survey';
+        }
 
-		$scope.submitCredentials = function(email, accessCode){
-			//convert to lowercase for improved formatting handling
+        $scope.submitCredentials = function(email, accessCode){
+            //convert to lowercase for improved formatting handling
             //alert(email+"   "+accessCode);
 
-			console.log(JSON.stringify({"email": email, "authorizationCode":accessCode}));
-			if($rootScope.isOnline()){
+            console.log(JSON.stringify({"email": email, "authorizationCode":accessCode}));
+            if($rootScope.isOnline()){
 
-				if( typeof(email) != "undefined"  && email != "" &&  email != null){
+                if( typeof(email) != "undefined"  && email != "" &&  email != null){
                     email = email.toLowerCase();
-					//Regular HTTP because we are not authenticated yet.
-					$rootScope.$broadcast("displayLoading");
+                    //Regular HTTP because we are not authenticated yet.
+                    $rootScope.$broadcast("displayLoading");
                     //alert(AUTHORIZE_PATH);
-					$http.post(AUTHORIZE_PATH, {"email": email, "authorizationCode":accessCode},{
+                    $http.post(AUTHORIZE_PATH, {"email": email, "authorizationCode":accessCode},{
                         headers: {'Content-Type':'application/json'}
                     }).success(function(data){
-						console.log(data);
-						$rootScope.$broadcast("closeLoading");
-						if(typeof(data.contact) !== "undefined"){
-							User.hasAccess = true;
-							User.email = email;
-							User.id = data.contact.id;
+                        console.log(data);
+                        $rootScope.$broadcast("closeLoading");
+                        if(typeof(data.contact) !== "undefined"){
+                            User.hasAccess = true;
+                            User.email = email;
+                            User.id = data.contact.id;
                             $rootScope.showDashboard = data.contact.showDashboard;
-							localStorage.setItem("contactId", data.contact.id);
-							localStorage.setItem("contactEmail", email);
+                            localStorage.setItem("contactId", data.contact.id);
+                            localStorage.setItem("contactEmail", email);
                             localStorage.setItem("showDashboard", data.contact.showDashboard);
-							$http.defaults.headers.common['UID'] = data.contact.id;
-							//app.SigGen.setEmail(email);
-						} else{
-							User.hasAccess = false;
-							User.email = '';
-							User.id = '';
-						}
+                            $http.defaults.headers.common['UID'] = data.contact.id;
+                            //app.SigGen.setEmail(email);
+                        } else{
+                            User.hasAccess = false;
+                            User.email = '';
+                            User.id = '';
+                        }
 
-						//call service to authorize
+                        //call service to authorize
                         if(User.hasAccess)
-						$location.path('/surveys/');
+                        $location.path('/surveys/');
                         else
                             $rootScope.$broadcast("displayModal", {message: data.description, button: 'Try Again'});
 
-					}).error(function(data, status, headers, config) {
-						$rootScope.$broadcast("closeLoading");
-						var mess = "The Email Address and Access Code combination was invalid.";
+                    }).error(function(data, status, headers, config) {
+                        $rootScope.$broadcast("closeLoading");
+                        var mess = "The Email Address and Access Code combination was invalid.";
 
-						if(status == 400){
-							if(data.description.indexOf("Json body") >= 0){
-								mess = "Please fill in your Email Address and Access Code.";
-							}
-						} else if(status == 500){
-							mess = "There was an error proccessing your credentials. Verify that Email Address and Access Code combination is valid."
-						}
-						$rootScope.$broadcast("displayModal", {message: mess, button: 'Try Again'});
-					});
-				} else{
+                        if(status == 400){
+                            if(data.description.indexOf("Json body") >= 0){
+                                mess = "Please fill in your Email Address and Access Code.";
+                            }
+                        } else if(status == 500){
+                            mess = "There was an error proccessing your credentials. Verify that Email Address and Access Code combination is valid."
+                        }
+                        $rootScope.$broadcast("displayModal", {message: mess, button: 'Try Again'});
+                    });
+                } else{
                  //   alert("hello");
-					$rootScope.$broadcast("displayModal", {message: "Please fill in your Email Address and Access Code", button: 'Try Again'});
-				}
-			}
-		};
-		$scope.progress = function(){
+                    $rootScope.$broadcast("displayModal", {message: "Please fill in your Email Address and Access Code", button: 'Try Again'});
+                }
+            }
+        };
+        $scope.progress = function(){
             var contactInfo = authHttp.get(CONTACT_INFO_PATH, {}).success(function(success){
                 if(typeof success.showDashboard !== "undefined"){
                     $rootScope.showDashboard = success.showDashboard;
@@ -82,41 +82,41 @@ var con = {
             }).error(function(){
                 $location.path($scope.appPath);
             });
-		}
-		$scope.termsAndConditions = function(){
-			window.open(T_AND_C_PATH, "_system");
-		}
+        }
+        $scope.termsAndConditions = function(){
+            window.open(T_AND_C_PATH, "_system");
+        }
         $scope.$on('backButtonPressed', function(event){
             console.log("Login page. Jump out of App!");
             navigator.app.exitApp();
             return false;
         });
-	},
+    },
 
 
 
     surveys: function($scope, $rootScope, $http, $location, Surveys, Account, authResource){
-		//TODO: get accountId from factory instead of hardcoding
+        //TODO: get accountId from factory instead of hardcoding
         $http.defaults.headers.common['UID'] = '00337000002JHCK';
 
-        var accountId = Account.getAccount().sfid;	//"001K000000nZFtFIAW";
+        var accountId = Account.getAccount().sfid;  //"001K000000nZFtFIAW";
         $scope.articleClass = ($rootScope.showDashboard == 'true' || (typeof($rootScope.showDashboard) == 'boolean' && $rootScope.showDashboard)) ? 'articleWithFooter' : '';
-		console.log('Loading list of Surveys.');
+        console.log('Loading list of Surveys.');
 
-		if($scope.isOnline()){
+        if($scope.isOnline()){
             console.log('isOnline');
             //========== COMMENT for testing
-			if(accountId == null || accountId == ''){
-				console.log('Calling Universal Survey Service');
-				$scope.displaySurveys = authResource(SURVEY_UNIVERSAL_PATH).query();
-			}else{
-			//	console.log('Calling Account-based Survey Service: '+accountId);
-				$scope.displaySurveys = authResource(SURVEY_ACCOUNT_PATH.replace(':accountId', accountId)).query();
-			}
-		}
+            if(accountId == null || accountId == ''){
+                console.log('Calling Universal Survey Service');
+                $scope.displaySurveys = authResource(SURVEY_UNIVERSAL_PATH).query();
+            }else{
+            //  console.log('Calling Account-based Survey Service: '+accountId);
+                $scope.displaySurveys = authResource(SURVEY_ACCOUNT_PATH.replace(':accountId', accountId)).query();
+            }
+        }
 
-		$scope.saveSurvey = function (selectedSurvey) {
-			Surveys.addSurvey(selectedSurvey, Account.getAccount());
+        $scope.saveSurvey = function (selectedSurvey) {
+            Surveys.addSurvey(selectedSurvey, Account.getAccount());
 
             // Save current chapter survey listing
             util.setLocalStorage(CACHED_SURVEY_CHAPTER, selectedSurvey);
@@ -158,7 +158,7 @@ var con = {
 
 
 
-	},
+    },
 
     chapters: function($scope, $rootScope, $http, $location, Surveys, Account){
         console.log('Loading list of Chapters.');
@@ -170,11 +170,11 @@ var con = {
             // Manage Cahpter survey after submit or back button activation
             var surveyChapter = util.getLocalStorage(CACHED_SURVEY_CHAPTER);
             childSurveys = surveyChapter.childSurveys;
-			$scope.parentName = surveyChapter.name;
-		}else{
+            $scope.parentName = surveyChapter.name;
+        }else{
             // set parent Survey name in scope
             $scope.parentName = Surveys.getChaptersParentName();
-		}
+        }
         $scope.displaySurveys = childSurveys;
 
         // Route to Chaoter Questions/Product scan
@@ -216,21 +216,21 @@ var con = {
         $scope.allSelectText = "None";
         $scope.accountName = Account.getAccount().name;
 
-		//TODO change this to loop through the questions, but keep on this page until done
-		var surveyId = $routeParams.surveyId;
-		//var counter = $routeParams.questionCount | 0;
-		var mySurvey = Surveys.getSurvey(surveyId); //[0].name;
+        //TODO change this to loop through the questions, but keep on this page until done
+        var surveyId = $routeParams.surveyId;
+        //var counter = $routeParams.questionCount | 0;
+        var mySurvey = Surveys.getSurvey(surveyId); //[0].name;
 
-		console.log('questionId: '+$routeParams.questionId+', firstQuestionId: '+mySurvey.first_question__c);
+        console.log('questionId: '+$routeParams.questionId+', firstQuestionId: '+mySurvey.first_question__c);
 
-		var questionId = $routeParams.questionId;
-		if(questionId == 'undefined' || questionId == undefined){ questionId = mySurvey.first_question__c; }
+        var questionId = $routeParams.questionId;
+        if(questionId == 'undefined' || questionId == undefined){ questionId = mySurvey.first_question__c; }
 
-		console.log('surveyId: '+surveyId+', questionId: '+questionId);
+        console.log('surveyId: '+surveyId+', questionId: '+questionId);
 
-		//$scope.question = mySurvey.questions[counter]; //[0].name;
-		//TODO: below is the new code for getting the question:
-		$scope.question = Surveys.getQuestion(questionId);
+        //$scope.question = mySurvey.questions[counter]; //[0].name;
+        //TODO: below is the new code for getting the question:
+        $scope.question = Surveys.getQuestion(questionId);
         if($scope.question.photos instanceof Array){
             $scope.photos = angular.copy($scope.question.photos);
             while($scope.photos.length < 3){
@@ -238,8 +238,8 @@ var con = {
             }
         }
         $scope.question.hasBeenAccessed = false;
-		$scope.wholeSurvey = mySurvey;
-		$scope.totalCount = Surveys.getQuestionCount();
+        $scope.wholeSurvey = mySurvey;
+        $scope.totalCount = Surveys.getQuestionCount();
         console.log($scope.question);
 
         //Pre-Parse Select All Text if this is an existing question.
@@ -252,58 +252,58 @@ var con = {
             }
         }
 
-		var counter = Breadcrumb.size() | 0;
+        var counter = Breadcrumb.size() | 0;
 
         if(($scope.question.question_type__c == TYPE_SELECT || $scope.question.question_type__c == TYPE_MULTI_SELECT)
-			&& $scope.question.answer_options__c instanceof Array){
+            && $scope.question.answer_options__c instanceof Array){
 
-			$scope.noneIncluded = false;
+            $scope.noneIncluded = false;
 
             console.log($scope.question.answer_options__c);
             for(option in $scope.question.answer_options__c){
 
-				console.log('WOOT Option: '+$scope.question.answer_options__c[option].text);
+                console.log('WOOT Option: '+$scope.question.answer_options__c[option].text);
                 if(typeof $scope.question.answer_options__c[option] === "string" && $scope.question.answer_options__c[option].text != OPTION_NONE_ABOVE){
                     var tempObj = {};
-                    tempObj.text = $scope.question.answer_options__c[option];
+                    tempObj.text = decodeURIComponent($scope.question.answer_options__c[option]);
                     tempObj.checked = false;
                     $scope.question.answer_options__c[option] = tempObj;
 
                 }else if($scope.question.answer_options__c[option].text == OPTION_NONE_ABOVE){
-					$scope.noneIncluded = true;
-				}
+                    $scope.noneIncluded = true;
+                }
             }
 
-			//add as option if 'None of the Above' is included
-			if($scope.question.include_none_of_the_above__c == 't' && $scope.noneIncluded != true){
-				var tempObj = {};
-				tempObj.text = OPTION_NONE_ABOVE;
-				tempObj.checked = false;
-				$scope.question.answer_options__c.push(tempObj);
-				//Surveys.includeNone($scope.question);
-			}
+            //add as option if 'None of the Above' is included
+            if($scope.question.include_none_of_the_above__c == 't' && $scope.noneIncluded != true){
+                var tempObj = {};
+                tempObj.text = OPTION_NONE_ABOVE;
+                tempObj.checked = false;
+                $scope.question.answer_options__c.push(tempObj);
+                //Surveys.includeNone($scope.question);
+            }
 
             console.log($scope.question.answer_options__c);
         }
 
-		$scope.updateSelection = function(optionSelected){
+        $scope.updateSelection = function(optionSelected){
 
-			//if($scope.question.question_type__c == TYPE_SELECT || ($scope.question.question_type__c == TYPE_MULTI_SELECT && optionSelected.text == OPTION_NONE_ABOVE)){
-				for(var option in $scope.question.answer_options__c){
-					console.log('Option Selected: '+optionSelected.text+'. Option matching: '+JSON.stringify($scope.question.answer_options__c[option]));
+            //if($scope.question.question_type__c == TYPE_SELECT || ($scope.question.question_type__c == TYPE_MULTI_SELECT && optionSelected.text == OPTION_NONE_ABOVE)){
+                for(var option in $scope.question.answer_options__c){
+                    console.log('Option Selected: '+optionSelected.text+'. Option matching: '+JSON.stringify($scope.question.answer_options__c[option]));
 
-					if($scope.question.answer_options__c[option].text != optionSelected.text){
+                    if($scope.question.answer_options__c[option].text != optionSelected.text){
 
-						if((optionSelected.text == OPTION_NONE_ABOVE && optionSelected.checked == true)
-						|| $scope.question.question_type__c == TYPE_SELECT
-						|| ($scope.question.answer_options__c[option].text == OPTION_NONE_ABOVE && $scope.question.answer_options__c[option].checked == true && $scope.question.question_type__c == TYPE_MULTI_SELECT)){
-							$scope.question.answer_options__c[option].checked = false;
-						}
-						if($scope.question.answer_options__c[option].text == OPTION_NONE_ABOVE && $scope.question.answer_options__c[option].checked == true && $scope.question.question_type__c == TYPE_MULTI_SELECT){
-							//alert('Woot!');
-						}
-					}
-				}
+                        if((optionSelected.text == OPTION_NONE_ABOVE && optionSelected.checked == true)
+                        || $scope.question.question_type__c == TYPE_SELECT
+                        || ($scope.question.answer_options__c[option].text == OPTION_NONE_ABOVE && $scope.question.answer_options__c[option].checked == true && $scope.question.question_type__c == TYPE_MULTI_SELECT)){
+                            $scope.question.answer_options__c[option].checked = false;
+                        }
+                        if($scope.question.answer_options__c[option].text == OPTION_NONE_ABOVE && $scope.question.answer_options__c[option].checked == true && $scope.question.question_type__c == TYPE_MULTI_SELECT){
+                            //alert('Woot!');
+                        }
+                    }
+                }
 
                 var allSelected = true;
                 for(option in $scope.question.answer_options__c){
@@ -313,8 +313,8 @@ var con = {
                     }
                 }
                 $scope.allSelectText = allSelected ? 'None' : 'All';
-			//}
-		};
+            //}
+        };
 
         $scope.selectAll = function(){
             if($scope.question.question_type__c === TYPE_MULTI_SELECT){
@@ -329,10 +329,10 @@ var con = {
             }
         };
 
-		$scope.counter = counter;
+        $scope.counter = counter;
 
-		$scope.saveAnswer = function(answer){
-			console.log($scope.wholeSurvey);
+        $scope.saveAnswer = function(answer){
+            console.log($scope.wholeSurvey);
 
             $scope.question.photos = [];
             //establish a reference for when location changes.
@@ -370,7 +370,7 @@ var con = {
             //    }
             //}
 
-			//grab selected values from multiselect picklists
+            //grab selected values from multiselect picklists
             if($scope.question.question_type__c == TYPE_MULTI_SELECT || $scope.question.question_type__c == TYPE_SELECT){
                 var selectedString = "";
                 console.log($scope.question.answer_options__c);
@@ -387,39 +387,39 @@ var con = {
                 $scope.question.answer_text__c = selectedString;
             }
 
-			//do field type validation
-			if(($scope.question.question_type__c == TYPE_TEXT || $scope.question.question_type__c == '')
-			&& $scope.question.answer_text__c == ''){
+            //do field type validation
+            if(($scope.question.question_type__c == TYPE_TEXT || $scope.question.question_type__c == '')
+            && $scope.question.answer_text__c == ''){
 
-				$rootScope.$broadcast('displayModal',{message:'You must enter text.', button: 'Ok'})
-			}
-			else if(($scope.question.question_type__c == TYPE_SELECT || $scope.question.question_type__c == TYPE_MULTI_SELECT)
-			&& $scope.question.answer_text__c == ''){
+                $rootScope.$broadcast('displayModal',{message:'You must enter text.', button: 'Ok'})
+            }
+            else if(($scope.question.question_type__c == TYPE_SELECT || $scope.question.question_type__c == TYPE_MULTI_SELECT)
+            && $scope.question.answer_text__c == ''){
 
-				$rootScope.$broadcast('displayModal',{message:'You must select an option.', button: 'Ok'})
-			}
-			else if($scope.question.question_type__c == TYPE_COUNT && ($scope.question.answer_value__c == null ||
-			$scope.question.answer_value__c == '')){
+                $rootScope.$broadcast('displayModal',{message:'You must select an option.', button: 'Ok'})
+            }
+            else if($scope.question.question_type__c == TYPE_COUNT && ($scope.question.answer_value__c == null ||
+            $scope.question.answer_value__c == '')){
 
-				$rootScope.$broadcast('displayModal',{message:'You must enter a number.', button: 'Ok'})
-			}
-			else if($scope.question.question_type__c == TYPE_PRICE && ($scope.question.answer_value__c == null ||
-			$scope.question.answer_value__c == '' || isNaN($scope.question.answer_value__c))){
+                $rootScope.$broadcast('displayModal',{message:'You must enter a number.', button: 'Ok'})
+            }
+            else if($scope.question.question_type__c == TYPE_PRICE && ($scope.question.answer_value__c == null ||
+            $scope.question.answer_value__c == '' || isNaN($scope.question.answer_value__c))){
 
-				$rootScope.$broadcast('displayModal',{message:'You must enter a valid price', button: 'Ok'})
-			}
-			else{
+                $rootScope.$broadcast('displayModal',{message:'You must enter a valid price', button: 'Ok'})
+            }
+            else{
                 $scope.question.hasBeenAccessed = true;
-				Breadcrumb.pushQuestion($scope.question);
+                Breadcrumb.pushQuestion($scope.question);
 
-				//THIS IS THE NEW CODE FOR CONDITIONALS:
-				var nextQ = Surveys.getNextQuestion($scope.question, true);
-				console.log('NextQ: '+JSON.stringify(nextQ));
-				if(nextQ != null){
-					$location.path('/question/'+mySurvey.survey_id+'/'+nextQ.sfid);
-				}else{
-					var crumbs = Breadcrumb.getResults();
-					console.log('Breadcrumbs: '+JSON.stringify(crumbs));
+                //THIS IS THE NEW CODE FOR CONDITIONALS:
+                var nextQ = Surveys.getNextQuestion($scope.question, true);
+                console.log('NextQ: '+JSON.stringify(nextQ));
+                if(nextQ != null){
+                    $location.path('/question/'+mySurvey.survey_id+'/'+nextQ.sfid);
+                }else{
+                    var crumbs = Breadcrumb.getResults();
+                    console.log('Breadcrumbs: '+JSON.stringify(crumbs));
 
                     //CHECK FOR UPLOADING PHOTOS.
                     var checkUploading = function(){
@@ -461,33 +461,33 @@ var con = {
 
                     $rootScope.$broadcast('displayLoading');
                     checkUploading();
-				}
+                }
 
-				/*
-				if(Surveys.getQuestionCount() > counter+1){
-					$location.path('/question/'+mySurvey.survey_id+'/'+(counter+1));
-				}else{
-					$location.path('/display/');
-				}
-				*/
-			}
-		};
+                /*
+                if(Surveys.getQuestionCount() > counter+1){
+                    $location.path('/question/'+mySurvey.survey_id+'/'+(counter+1));
+                }else{
+                    $location.path('/display/');
+                }
+                */
+            }
+        };
 
-		$scope.previous = function(){
-			if(counter > 0){
-				var prevQuestion = Breadcrumb.popQuestion();
-				$location.path('/question/'+mySurvey.survey_id+'/'+prevQuestion.sfid);
-			}else{
+        $scope.previous = function(){
+            if(counter > 0){
+                var prevQuestion = Breadcrumb.popQuestion();
+                $location.path('/question/'+mySurvey.survey_id+'/'+prevQuestion.sfid);
+            }else{
                 //TODO:
                 // Conditional route for Non Product survey types
                // if(mySurvey.survey_type__c == NON_PRODUCT_SURVEY){
                //     var goal = Goals.getGoal();
                //     if(JSON.stringify(goal) === "{}"){
-    			//		if(mySurvey.parent_survey__c != null){
+                //      if(mySurvey.parent_survey__c != null){
                //             $location.path('/chapters/');
-    			//		}else{
-               //         	$location.path('/surveys/');
-    			//		}
+                //      }else{
+               //           $location.path('/surveys/');
+                //      }
                //     } else{
                //         $location.path('/goals/' + goal.assignedGoal.sfid);
                //     }
@@ -496,11 +496,11 @@ var con = {
                 //}
                 if(mySurvey.parent_survey__c != null){
                                 $location.path('/chapters/');
-                    		}else{
-                             	$location.path('/surveys/');
-                    		}
+                            }else{
+                                $location.path('/surveys/');
+                            }
             }
-		};
+        };
 
         $scope.goBack = function() {
             // Clear all breadcrumbs
@@ -548,43 +548,43 @@ var con = {
 
         $http.defaults.headers.common['UID'] = '00337000002JHCK';
         $scope.account = Account.getAccount();
-		//var breadcrumbs = BreadcrumbService.getResults();
-		$scope.surveys = Surveys.getSurveys();
-		$rootScope.isEdit = false;
-		$scope.isProductSurvey = true;
+        //var breadcrumbs = BreadcrumbService.getResults();
+        $scope.surveys = Surveys.getSurveys();
+        $rootScope.isEdit = false;
+        $scope.isProductSurvey = true;
 
 
-		if($scope.surveys[0] && $scope.surveys[0].survey_type__c == NON_PRODUCT_SURVEY){
-			$scope.isProductSurvey = false;
-			//$scope.surveys = Surveys.getOrderedSurveys(breadcrumbs);
-		}
+        if($scope.surveys[0] && $scope.surveys[0].survey_type__c == NON_PRODUCT_SURVEY){
+            $scope.isProductSurvey = false;
+            //$scope.surveys = Surveys.getOrderedSurveys(breadcrumbs);
+        }
 
 
         $scope.continueWorking = function() {
-			//Surveys.saveDisplay();
-			$rootScope.isEdit = true;
+            //Surveys.saveDisplay();
+            $rootScope.isEdit = true;
             $location.path('/product/');
         };
 
         $scope.getQuestion = function(surveyId) {
-			//$rootScope.setEdit(true);
-			$rootScope.isEdit = true;
+            //$rootScope.setEdit(true);
+            $rootScope.isEdit = true;
             Surveys.prepForEdit();
-			console.log('isEdit: '+$rootScope.isEdit);
+            console.log('isEdit: '+$rootScope.isEdit);
             $location.path('/question/'+surveyId);
         };
 
         $scope.finish = function() {
             //TODO:Add Non product survey to salesforce,code comment to make all survey as non-product
-			//if($scope.isProductSurvey){
-			//	$location.path('/notes/');
-			//}else
-			if($rootScope.isOnline()){	//for Conditional Surveys
+            //if($scope.isProductSurvey){
+            //  $location.path('/notes/');
+            //}else
+            if($rootScope.isOnline()){  //for Conditional Surveys
 
-				$rootScope.$broadcast("displayLoading");
-				authHttp.post(SURVEY_SUBMIT_PATH, Surveys.getSurveys()).success(function(data){
-					//alert('Your Data has been saved.');
-					$rootScope.$broadcast("closeLoading");
+                $rootScope.$broadcast("displayLoading");
+                authHttp.post(SURVEY_SUBMIT_PATH, Surveys.getSurveys()).success(function(data){
+                    //alert('Your Data has been saved.');
+                    $rootScope.$broadcast("closeLoading");
 
                     // Save Survey
                     var listSurvey = Surveys.getSurveys();
@@ -592,17 +592,17 @@ var con = {
                     //if(tmp_survey != null && tmp_survey.parent_survey__c == null){
                         Surveys.reset();
                     //}
-					console.log('Returned Data: '+JSON.stringify(data));
-					if(typeof(data) != 'undefined' && (typeof(data.percentage) != 'undefined' || typeof(data.grade) != 'undefined' || typeof(data.message) != 'undefined')){
+                    console.log('Returned Data: '+JSON.stringify(data));
+                    if(typeof(data) != 'undefined' && (typeof(data.percentage) != 'undefined' || typeof(data.grade) != 'undefined' || typeof(data.message) != 'undefined')){
 
-							$rootScope.$broadcast('displayModal', {
-								type: 'grade',
-								percentage: data.percentage,
-								grade: data.grade,
-								message: data.message,
-								button: 'Okay'
-							});
-					}
+                            $rootScope.$broadcast('displayModal', {
+                                type: 'grade',
+                                percentage: data.percentage,
+                                grade: data.grade,
+                                message: data.message,
+                                button: 'Okay'
+                            });
+                    }
                    // Goals.setCache(Goals.cachedMonth(), null);
 
                     //TODO:Comment code to remove goal screen and return to survey screen after submitting the survey
@@ -623,12 +623,12 @@ var con = {
                                 $location.path('/surveys/');
                     }
 
-				}).error(function(data, status, headers, config){
-					//alert('Error! '+data);
-					$rootScope.$broadcast("closeLoading");
-					$rootScope.$broadcast('displayModal', {message: data, button: 'Okay'});
-				});
-			}
+                }).error(function(data, status, headers, config){
+                    //alert('Error! '+data);
+                    $rootScope.$broadcast("closeLoading");
+                    $rootScope.$broadcast('displayModal', {message: data, button: 'Okay'});
+                });
+            }
         }
 
         $scope.cancel = function() {
@@ -650,11 +650,11 @@ var con = {
 
             });
 
-			/*var r = confirm("This will remove all saved Surveys.");
-			if (r == true){
-				Surveys.reset();
-				$location.path('/locations/');
-			}*/
+            /*var r = confirm("This will remove all saved Surveys.");
+            if (r == true){
+                Surveys.reset();
+                $location.path('/locations/');
+            }*/
 
         }
 
@@ -669,23 +669,23 @@ var con = {
 
     splash: function($scope, $rootScope, $location, $http, $timeout, User) {
         var that = this;
-	console.log("Application Loaded.");
-	var appPath = '/login';
+    console.log("Application Loaded.");
+    var appPath = '/login';
 
-	//if already authenticated
-	if(localStorage.getItem("contactId") != null){
-		User.hasAccess = true;
-		User.id = localStorage.getItem("contactId");
-		User.email = localStorage.getItem("contactEmail");
-		$http.defaults.headers.common['UID'] = localStorage.getItem("contactId");
-		app.SigGen.setEmail(User.email);
-	}
-	if(!IS_DEVICE_READY){
-		document.addEventListener('deviceready', function(){navigator.splashscreen.hide()}, false);
-	} else{
-		navigator.splashscreen.hide();
-	}
-	$location.path(appPath);
+    //if already authenticated
+    if(localStorage.getItem("contactId") != null){
+        User.hasAccess = true;
+        User.id = localStorage.getItem("contactId");
+        User.email = localStorage.getItem("contactEmail");
+        $http.defaults.headers.common['UID'] = localStorage.getItem("contactId");
+        app.SigGen.setEmail(User.email);
+    }
+    if(!IS_DEVICE_READY){
+        document.addEventListener('deviceready', function(){navigator.splashscreen.hide()}, false);
+    } else{
+        navigator.splashscreen.hide();
+    }
+    $location.path(appPath);
     $scope.$on('backButtonPressed', function(event){
         console.log("Splash page. Exit the app.");
         navigator.app.exitApp();
@@ -695,9 +695,9 @@ var con = {
 
 
     modal: function($scope, $rootScope){
-		$scope.close = function(){
-			$rootScope.$broadcast('closeModal');
-		};
+        $scope.close = function(){
+            $rootScope.$broadcast('closeModal');
+        };
     },
 
     modalPrompt: function($scope, $rootScope){
