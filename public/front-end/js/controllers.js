@@ -378,7 +378,7 @@ var con = {
                     console.log($scope.question.answer_options__c[option]);
                     if($scope.question.answer_options__c[option].checked){
                         if(selectedString != ""){
-                            selectedString += ";";
+                            selectedString += ANSWER_DELIMITER;
                         }
                         selectedString += $scope.question.answer_options__c[option].text;
                     }

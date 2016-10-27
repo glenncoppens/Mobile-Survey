@@ -41,3 +41,6 @@ var TYPE_TEXT = 'Text';
 var TYPE_COUNT = 'Count';
 var TYPE_PRICE = 'Price';
 var OPTION_NONE_ABOVE = 'None of the Above';
+
+// Answer constants
+var ANSWER_DELIMITER = ':::';
