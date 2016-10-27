@@ -1,6 +1,6 @@
 {
-  "name": "Heroku Cx Survey Dev Services",
-  "description": "TODO: Add a short description about Heroku Cx Survey Dev Services",
+  "name": "Custom Mobile Survey (Heroku)",
+  "description": "A mobile and desktop survey application using Salesforce Connect, Postgres and HHeroku.",
   "keywords": [
     "small",
     "sharp",
