@@ -48,7 +48,7 @@
                         <div ng-switch-when="Count">{{question.answer_value__c}}</div>
                         <div ng-switch-default>
                         	<div>
-	                        	<div ng-repeat="opt in question.answer_text__c.split(';')"  ng-bind="opt">
+	                        	<div ng-repeat="opt in question.answer_text__c.split(':::')"  ng-bind="opt">
 	                        	</div>
                         	</div> 
                         </div>

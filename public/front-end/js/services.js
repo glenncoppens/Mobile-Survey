@@ -274,7 +274,7 @@ angular.module('fieldSurveyServices', ['ngResource'])
     							matchingChildren.push(childQ);
     						}
                         } else {
-                            var multiAnswers = (typeof parentQ.answer_text__c === "string") ? parentQ.answer_text__c.split(";") : [];
+                            var multiAnswers = (typeof parentQ.answer_text__c === "string") ? parentQ.answer_text__c.split(ANSWER_DELIMITER) : [];
                             for (var i = 0; i < multiAnswers.length; i++){
                                 if(childQ.conditional_answer__c == multiAnswers[i]){
                                     matchingChildren.push(childQ);
@@ -305,7 +305,7 @@ angular.module('fieldSurveyServices', ['ngResource'])
     						}
                         } else{
                             var childQMatch = false;
-                            var multiAnswers = (typeof parentQ.answer_text__c === "string") ? parentQ.answer_text__c.split(";") : [];
+                            var multiAnswers = (typeof parentQ.answer_text__c === "string") ? parentQ.answer_text__c.split(ANSWER_DELIMITER) : [];
                             for (var i = 0; i < multiAnswers.length; i++){
                                 if(childQ.conditional_answer__c == multiAnswers[i]){
                                     childQMatch = true;
